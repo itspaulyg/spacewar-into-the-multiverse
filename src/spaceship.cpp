@@ -1,38 +1,31 @@
-#include "../classes/spaceship.h"
+#include "spaceship.h"
 
 void check_boundaries(int, int);
 
-Spaceship::Spaceship(const Window &win, int wIn, int hIn, int xIn, int yIn, int xVelIn, int yVelIn, int wVelIn, double deg, const std::string &image_path) : Window(win), w(wIn), h(hIn), x(xIn), y(yIn), xVel(xVelIn), yVel(yVelIn), wVel(wVelIn), degree(deg)
-{
-	SDL_Surface *surface = IMG_Load(image_path.c_str());
-	if(!surface) {
-		std::cout << "failed to create surface\n";
-		std::cout << IMG_GetError() << std::endl;
-		std::cout << image_path.c_str() << std::endl;
-	}
-
-	texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-	if(!texture) {
-		std::cout << "failed to load texture\n";
-	}
-
-	SDL_FreeSurface(surface);
-
-}
+Spaceship::Spaceship(int xIn, int yIn, int wIn, int hIn) : 
+		x(xIn), y(yIn), w(wIn), h(hIn), dx(0), dy(0), angle(0), alive(true) { }
 
 Spaceship::~Spaceship() {
 	SDL_DestroyTexture(texture);
 }
 
-void Spaceship::draw() const {
-	SDL_Rect spaceship = {x, y, w, h};
-
-	if(texture) {
-		SDL_RenderCopyEx(renderer, texture, nullptr, &spaceship, degree, NULL, SDL_FLIP_NONE);
-	}
+void Spaceship::loadSprite(const std::string &image_path) {
+	texture = loadTexture(const_cast<char*>(image_path.c_str()));
 }
 
+void Spaceship::draw() const {
+	blit(texture, x, y, w, h, angle);
+}
+
+void Spaceship::turn(double dangle) {
+	angle += dangle;
+}
+
+bool Spaceship::isAlive() {
+	return alive;
+}
+
+/*
 void Spaceship::pollEvents(SDL_Event &event) {
 
 //need to add acceleration on keydown
@@ -88,3 +81,4 @@ void check_boundaries(int x, int y) {
 		x = 920;
 	}
 }
+*/

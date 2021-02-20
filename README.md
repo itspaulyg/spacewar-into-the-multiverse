@@ -9,3 +9,6 @@ We are using SDL as our graphics library for this project. To have all features 
 sudo apt-get install build-essential git make cmake autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libgl1-mesa-dev libdbus-1-dev libudev-dev libgles2-mesa-dev libegl1-mesa-dev libibus-1.0-dev fcitx-libs-dev libsamplerate0-dev libsndio-dev libwayland-dev libxkbcommon-dev
 
 A Makefile is provided so that you just have to type in the command 'make' and it will start running the program. Please run 'make clean' prior to pushing any changes to GitHub.
+
+## Building (Linux)
+`sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev`
