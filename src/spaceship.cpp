@@ -3,7 +3,7 @@
 void check_boundaries(int, int);
 
 Spaceship::Spaceship(int xIn, int yIn, int wIn, int hIn) : 
-		x(xIn), y(yIn), w(wIn), h(hIn), dx(0), dy(0), angle(0), alive(true) { }
+		x((double) xIn), y((double) yIn), w(wIn), h(hIn), dx(0), dy(0), angle(0), alive(true) { }
 
 Spaceship::~Spaceship() {
 	SDL_DestroyTexture(texture);
@@ -14,11 +14,30 @@ void Spaceship::loadSprite(const std::string &image_path) {
 }
 
 void Spaceship::draw() const {
-	blit(texture, x, y, w, h, angle);
+	blit(texture, (int) round(x), (int) round(y), w, h, angle);
 }
 
 void Spaceship::turn(double dangle) {
 	angle += dangle;
+	if (angle > 360) {
+		angle -= 360;
+	}
+	if (angle < -360) {
+		angle += 360;
+	}
+	printf("%f\n", angle);
+}
+
+void Spaceship::thrust(double force) {
+	dx += (cos(angle * (PI / 180.0)) * force);
+	dy += (sin(angle * (PI / 180.0)) * force);
+	printf("dx: %f\t dy: %f\n", dx, dy);
+}
+
+void Spaceship::move() {
+	x += dx * TICK;
+	y += dy * TICK;
+	return;
 }
 
 bool Spaceship::isAlive() {

@@ -16,12 +16,15 @@ class Spaceship {
 		void draw() const;
 
 		void turn(double dangle);
+		void thrust(double force);
+
+		void move();
 		bool isAlive();
 
 	private:
-		int x, y;		// position (coordinates)
+		double x, y;	// position (coordinates)
 		int w, h;		// width and height of displayed texture
-		float dx, dy;	// velocity
+		double dx, dy;	// velocity vectors
 		double angle;	// angle in degrees
 		bool alive;
 		SDL_Texture *texture = nullptr;
