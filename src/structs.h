@@ -9,3 +9,14 @@ typedef struct {
     Delegate delegate;
     int keyboard[MAX_KEYBOARD_KEYS];
 } App;
+
+typedef struct {
+	double x;
+	double y;
+  double dx;
+  double dy;
+  int w;
+  int h;
+	int status;
+	SDL_Texture *texture;
+} Entity;

@@ -17,11 +17,11 @@ class Spaceship {
 
 		void turn(double dangle);
 		void thrust(double force);
+		void fire();
 
 		void move();
 		bool isAlive();
 
-	private:
 		double x, y;	// position (coordinates)
 		int w, h;		// width and height of displayed texture
 		double dx, dy;	// velocity vectors
