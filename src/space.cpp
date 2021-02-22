@@ -31,11 +31,11 @@ static void logic() {
 static void doShips() {
     if (wedge.isAlive()) {
         if (app.keyboard[SDL_SCANCODE_A]) {     // turn CCW
-            wedge.turn(TURNSPEED);
+            wedge.turn(-TURNSPEED);
             printf("A\n");
         }
         if (app.keyboard[SDL_SCANCODE_D]) {     // turn CW
-            wedge.turn(-TURNSPEED);
+            wedge.turn(TURNSPEED);
             printf("D\n");
         }
         if (app.keyboard[SDL_SCANCODE_S]) {     // thrust
@@ -50,11 +50,11 @@ static void doShips() {
     }
     if (needle.isAlive()) {
         if (app.keyboard[SDL_SCANCODE_J]) {     // turn CCW
-            needle.turn(TURNSPEED);
+            needle.turn(-TURNSPEED);
             printf("J\n");
         }
         if (app.keyboard[SDL_SCANCODE_L]) {     // turn CW
-            needle.turn(-TURNSPEED);
+            needle.turn(TURNSPEED);
             printf("L\n");
         }
         if (app.keyboard[SDL_SCANCODE_K]) {     // thrust
