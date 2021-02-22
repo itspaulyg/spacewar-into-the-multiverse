@@ -6,7 +6,7 @@ actual constant global variables.
 
 */
 
-#define PI 3.14159
+#define PI 3.14159265
 
 #define SCREEN_WIDTH	720
 #define SCREEN_HEIGHT	720
@@ -22,5 +22,7 @@ actual constant global variables.
 #define NEEDLE_W    100     // Image dimension
 #define NEEDLE_H    40      // Image dimension
 
-#define SHIPTHRUST  3
+#define THRUSTFORCE  0.1
 #define TURNSPEED   1
+
+#define TICK 0.2

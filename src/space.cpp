@@ -39,6 +39,7 @@ static void doShips() {
             printf("D\n");
         }
         if (app.keyboard[SDL_SCANCODE_S]) {     // thrust
+            wedge.thrust(THRUSTFORCE);
             printf("Thrusting...\n");
         }
         if (app.keyboard[SDL_SCANCODE_W]) {     // fire
@@ -47,6 +48,7 @@ static void doShips() {
         if (app.keyboard[SDL_SCANCODE_Q]) {     // hyperspace
             printf("Hyperspace\n");
         }
+        wedge.move();
     }
     if (needle.isAlive()) {
         if (app.keyboard[SDL_SCANCODE_J]) {     // turn CCW
@@ -58,6 +60,7 @@ static void doShips() {
             printf("L\n");
         }
         if (app.keyboard[SDL_SCANCODE_K]) {     // thrust
+            needle.thrust(THRUSTFORCE);
             printf("Thrusting...\n");
         }
         if (app.keyboard[SDL_SCANCODE_I]) {     // fire
@@ -66,6 +69,7 @@ static void doShips() {
         if (app.keyboard[SDL_SCANCODE_U]) {     // hyperspace
             printf("Hyperspace\n");
         }
+        needle.move();
     }
 }
 
