@@ -27,7 +27,10 @@ actual constant global variables.
 #define NEEDLE_TRAIL_WX     1
 #define NEEDLE_TRAIL_HX     0.5
 
-#define BULLET_SPEED    1
+#define BULLET_SPEED    0.15
 
 #define THRUSTFORCE  0.001
 #define TURNSPEED   1
+
+#define SIDE_WEDGE   0    // set different teams for collision detection
+#define SIDE_NEEDLE  1

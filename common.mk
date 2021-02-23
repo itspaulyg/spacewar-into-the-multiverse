@@ -9,6 +9,7 @@ DEPS += defs.h structs.h
 _OBJS += draw.o
 _OBJS += input.o
 _OBJS += main.o
+_OBJS += util.o
 _OBJS += space.o window.o
 
 OBJS = $(patsubst %,$(OUT)/%,$(_OBJS))
@@ -20,7 +21,7 @@ all: $(PROG)
 $(OUT)/%.o: %.cpp %.h $(DEPS)
 	@mkdir -p $(OUT)
 	$(PP) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
-	
+
 # cleaning everything that can be automatically recreated with "make".
 clean:
 	$(RM) -rf $(OUT) $(PROG)
