@@ -273,18 +273,10 @@ static void draw() {
 }
 
 static void drawShips() {
-    if(!wedge) return;
-    if (wedge->texture) {
+    if (wedge && wedge->texture) {
         blit(wedge->texture, (int) round(wedge->x), (int) round(wedge->y), wedge->w, wedge->h, wedge->angle);
-    } else {
-        printf("Need to provide texture for ship!\n");
-		exit(1);
     }
-    if(!needle) return;
-    if (needle->texture) {
+    if (needle && needle->texture) {
         blit(needle->texture, (int) round(needle->x), (int) round(needle->y), needle->w, needle->h, needle->angle);
-    } else {
-        printf("Need to provide texture for ship!\n");
-		exit(1);
     }
 }
