@@ -13,6 +13,10 @@ static void doShips();
 static void fireBullet(double x, double y, int h, double angle);
 static void drawBullets();
 static void doBullets();
+static void setTempWedge();
+static void setTempNeedle();
+static void checkBoundsWedge();
+static void checkBoundsNeedle();
 // static void doWedgeFire();
 // static void doNeedleFire();
 // static void drawBullets();
@@ -26,9 +30,14 @@ static void drawShips();
 
 static Entity *wedge;
 static Entity *needle;
+static Entity *wedge_temp;
+static Entity *needle_temp;
 static SDL_Texture *wedge_texture;
 static SDL_Texture *needle_texture;
 static SDL_Texture *bullet_texture;
+
+bool wedge_bound = false;
+bool needle_bound = false;
 
 void initSpace() {
     app.delegate.logic = logic;
@@ -39,7 +48,7 @@ void initSpace() {
 
     wedge_texture = loadTexture((char *) "./wedge.png");
     needle_texture = loadTexture((char *) "./needle.png");
-    bullet_texture = loadTexture(const_cast<char*>("bullet.png"));
+//    bullet_texture = loadTexture(const_cast<char*>("bullet.png"));
 
     resetSpace();
 }
@@ -61,11 +70,27 @@ static void initWedge() {
     wedge->dy = 0;
     wedge->alive = true;
     wedge->texture = wedge_texture;
+
+    wedge_temp = (Entity *)malloc(sizeof(Entity));
+    memset(wedge_temp, 0, sizeof(Entity));
+
+    wedge_temp->x = -100;
+    wedge_temp->y = -100;
+    wedge_temp->w = WEDGE_W;
+    wedge_temp->h = WEDGE_H;
+    wedge_temp->dx = 0;
+    wedge_temp->dy = 0;
+    wedge_temp->alive = true;
+    wedge->texture = wedge_texture;
 }
 
 static void initNeedle() {
     needle = (Entity *) malloc(sizeof(Entity));
     memset(needle, 0, sizeof(Entity));
+
+    needle_temp = (Entity *) malloc(sizeof(Entity));
+    memset(needle_temp, 0, sizeof(Entity));
+	needle_temp->texture = needle_texture;
 
     needle->x = NEEDLE_X;
     needle->y = NEEDLE_Y;
@@ -103,6 +128,10 @@ static void doShips() {
         if (app.keyboard[SDL_SCANCODE_S]) {     // thrust
             wedge->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
             wedge->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+			if(wedge_bound) {
+	            wedge_temp->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+	            wedge_temp->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+			}
             printf("Thrusting...\n");
             printf("dx: %f\t dy: %f\n", wedge->dx, wedge->dy);
         }
@@ -148,6 +177,118 @@ static void doShips() {
     wedge->y += wedge->dy;
     needle->x += needle->dx;
     needle->y += needle->dy;
+
+	if(!wedge_bound) setTempWedge();
+	if(!needle_bound) setTempNeedle();
+	if(wedge_bound) { // make sure to set these 
+		wedge_temp->x += wedge_temp->dx;
+		wedge_temp->y += wedge_temp->dy;
+		checkBoundsWedge();
+	}
+	if(needle_bound) checkBoundsNeedle();
+}
+
+static void setTempWedge() {
+	if(wedge->x + wedge->w >= SCREEN_WIDTH) { // working logic; repeat for the rest
+		printf("check");
+		wedge_bound = true;
+		wedge_temp->x = 0 - wedge->w;
+		wedge_temp->y = wedge->y;
+		wedge_temp->dx = wedge->dx;
+		wedge_temp->dy = wedge->dy;
+	}
+	if(wedge->x <= 0) {
+		wedge_bound = true;
+		wedge_temp->x = SCREEN_WIDTH;
+		wedge_temp->y = wedge->y;
+	}
+	if(wedge->y + wedge->h >= SCREEN_HEIGHT) {
+		wedge_bound = true;
+		wedge_temp->x = wedge->x;
+		wedge_temp->y = 0 - wedge->h;
+	}
+	if(wedge->y <= 0) {
+		wedge_bound = true;
+		wedge_temp->x = wedge->x;
+		wedge_temp->y = SCREEN_HEIGHT;
+	}
+}
+
+static void setTempNeedle() {
+	if(needle->x + needle->w >= SCREEN_WIDTH) {
+		needle_bound = true;
+		needle_temp->x = 0 - needle->w;
+		needle_temp->y = needle->y;
+	}
+	if(needle->x <= 0) {
+		needle_bound = true;
+		needle_temp->x = SCREEN_WIDTH;
+		needle_temp->y = needle->y;
+	}
+	if(needle->y + needle->h >= SCREEN_HEIGHT) {
+		needle_bound = true;
+		needle_temp->x = needle->x;
+		needle_temp->y = 0 - needle->h;
+	}
+	if(needle->y <= 0) {
+		needle_bound = true;
+		needle_temp->x = needle->x;
+		needle_temp->y = SCREEN_HEIGHT;
+	}
+}
+
+static void checkBoundsWedge() {
+	if(wedge->x >= SCREEN_WIDTH) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_temp->x = -100;
+		wedge_temp->y = -100;
+		wedge_bound = false;
+	}
+	if(wedge->x <= 0 - wedge->w) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_temp->x = -100;
+		wedge_temp->y = -100;
+		wedge_bound = false;
+	}
+	if(wedge->y >= SCREEN_HEIGHT) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_temp->x = -100;
+		wedge_temp->y = -100;
+		wedge_bound = false;
+	}
+	if(wedge->y <= 0 - wedge->h) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_temp->x = -100;
+		wedge_temp->y = -100;
+		wedge_bound = false;
+	}
+}
+
+static void checkBoundsNeedle() {
+	if(needle->x >= SCREEN_WIDTH) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
+	if(needle->x <= 0 - needle->w) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
+	if(needle->y >= SCREEN_HEIGHT) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
+	if(needle->y <= 0 - needle->h) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
 }
 
 static void fireBullet(double x, double y, int h, double angle){
@@ -209,12 +350,19 @@ static void draw() {
 static void drawShips() {
     if (wedge->texture) {
         blit(wedge->texture, (int) round(wedge->x), (int) round(wedge->y), wedge->w, wedge->h, wedge->angle);
+		if(wedge_bound) {
+			printf("Drawing wedge temp...\n");
+        	blit(wedge->texture, (int) round(wedge_temp->x), (int) round(wedge_temp->y), wedge->w, wedge->h, wedge->angle);
+		}
     } else {
         printf("Need to provide texture for ship!\n");
 		exit(1);
     }
     if (needle->texture) {
         blit(needle->texture, (int) round(needle->x), (int) round(needle->y), needle->w, needle->h, needle->angle);
+		if(needle_bound) {
+        	blit(needle->texture, (int) round(needle_temp->x), (int) round(needle_temp->y), needle->w, needle->h, needle->angle);
+		}
     } else {
         printf("Need to provide texture for ship!\n");
 		exit(1);

@@ -35,8 +35,8 @@ void Spaceship::thrust(double force) {
 }
 
 void Spaceship::move() {
-	x += dx * TICK;
-	y += dy * TICK;
+	x += dx;
+	y += dy;
 	return;
 }
 
