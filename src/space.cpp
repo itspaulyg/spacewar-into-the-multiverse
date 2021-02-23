@@ -107,7 +107,6 @@ static void doNeedle(){
     }
   }
   if (needle->alive) {
-      printf("needle alive\n");
       if (needle->reload > 0){ // acts as a timer to prevent bullet spam
         needle->reload--;
       }
@@ -157,7 +156,6 @@ static void doWedge() {
       }
     }
     if (wedge->alive) {
-        printf("wedge alive\n");
         if (wedge->reload > 0){ // acts as a timer to prevent bullet spam
           wedge->reload--;
         }
