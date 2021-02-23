@@ -17,6 +17,7 @@ struct Entity {
   int w, h;               // width and height of displayed texture
   double dx, dy;          // velocity vectors
   double angle;           // angle in degrees
+  int reload;             // prevents bullet spam
 	int health;
   bool alive;
 	int status;  // whether bullet is displayed (1) or not (0)

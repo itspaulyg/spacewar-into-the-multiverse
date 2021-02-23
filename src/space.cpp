@@ -10,7 +10,7 @@ static void initNeedle();
 
 // Logic
 static void doShips();
-static void fireBullet(double x, double y, int h, double angle);
+static void fireBullet(Entity*);
 static void drawBullets();
 static void doBullets();
 // static void doWedgeFire();
@@ -84,6 +84,10 @@ static void logic() {
 
 static void doShips() {
     if (wedge->alive) {
+        if (wedge->reload > 0){ // acts as a timer to prevent bullet spam
+          wedge->reload--;
+        }
+
         if (app.keyboard[SDL_SCANCODE_A]) {     // turn CCW
             wedge->angle -= TURNSPEED;
             printf("A\n");
@@ -106,8 +110,8 @@ static void doShips() {
             printf("Thrusting...\n");
             printf("dx: %f\t dy: %f\n", wedge->dx, wedge->dy);
         }
-        if (app.keyboard[SDL_SCANCODE_W]) {     // fire
-            fireBullet(wedge->x, wedge->y, wedge->h, wedge->angle);
+        if (app.keyboard[SDL_SCANCODE_W] && wedge->reload == 0) {     // fire
+            fireBullet(wedge);
             printf("Firing\n");
         }
         if (app.keyboard[SDL_SCANCODE_Q]) {     // hyperspace
@@ -115,6 +119,9 @@ static void doShips() {
         }
     }
     if (needle->alive) {
+        if (needle->reload > 0){ // acts as a timer to prevent bullet spam
+          needle->reload--;
+        }
         if (app.keyboard[SDL_SCANCODE_J]) {     // turn CCW
             needle->angle -= TURNSPEED;
             printf("J\n");
@@ -137,7 +144,8 @@ static void doShips() {
             printf("Thrusting...\n");
             printf("dx: %f\t dy: %f\n", needle->dx, needle->dy);
         }
-        if (app.keyboard[SDL_SCANCODE_I]) {     // fire
+        if (app.keyboard[SDL_SCANCODE_I] && needle->reload == 0) {     // fire
+            fireBullet(needle);
             printf("Firing\n");
         }
         if (app.keyboard[SDL_SCANCODE_U]) {     // hyperspace
@@ -148,9 +156,14 @@ static void doShips() {
     wedge->y += wedge->dy;
     needle->x += needle->dx;
     needle->y += needle->dy;
+
+    if (app.keyboard[SDL_SCANCODE_R]) {     // Reset
+        resetSpace();
+        printf("Reset\n");
+    }
 }
 
-static void fireBullet(double x, double y, int h, double angle){
+static void fireBullet(Entity* e){
 	Entity *bullet;
 	bullet = (Entity*)malloc(sizeof(Entity));
 	memset(bullet, 0, sizeof(Entity));
@@ -158,16 +171,16 @@ static void fireBullet(double x, double y, int h, double angle){
   stage.bulletTail->next = bullet;
 	stage.bulletTail = bullet;
 
-	bullet->x = x;
-	bullet->y = y;
-  bullet->dx += (cos(angle * (PI / 180.0)) * BULLET_SPEED);
-  bullet->dy += (sin(angle * (PI / 180.0)) * BULLET_SPEED);
+	bullet->x = e->x;
+	bullet->y = e->y;
+  bullet->dx += (cos(e->angle * (PI / 180.0)) * BULLET_SPEED);
+  bullet->dy += (sin(e->angle * (PI / 180.0)) * BULLET_SPEED);
 	bullet->status = 1;
 	bullet->texture = bullet_texture;
 	SDL_QueryTexture(bullet->texture, NULL, NULL, &bullet->w, &bullet->h);
+	bullet->y += (e->h / 2) - (bullet->h / 2);
 
-	bullet->y += (h / 2) - (bullet->h / 2);
-
+  e->reload = 500;  // timer value in frames for how often a bullet can be shot
 }
 
 static void drawBullets(){
