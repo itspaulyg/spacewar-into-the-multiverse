@@ -17,7 +17,7 @@ int main() {
 		app.delegate.logic();
 
 		app.delegate.draw();
-
+		
 		presentScene();
 	}
 
