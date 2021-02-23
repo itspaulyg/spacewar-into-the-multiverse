@@ -12,3 +12,4 @@ extern void prepareScene();
 extern void presentScene();
 
 App app;
+Stage stage;

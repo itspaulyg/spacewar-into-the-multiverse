@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern void blit(SDL_Texture *texture, int x, int y, int w, int h, double angle);
+extern void blit(SDL_Texture *texture, int x, int y);
 extern SDL_Texture *loadTexture(char *filename);
 
 class Spaceship {
@@ -21,7 +22,6 @@ class Spaceship {
 		void move();
 		bool isAlive();
 
-	private:
 		double x, y;	// position (coordinates)
 		int w, h;		// width and height of displayed texture
 		double dx, dy;	// velocity vectors

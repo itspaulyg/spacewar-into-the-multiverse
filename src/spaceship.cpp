@@ -2,7 +2,7 @@
 
 void check_boundaries(int, int);
 
-Spaceship::Spaceship(int xIn, int yIn, int wIn, int hIn) : 
+Spaceship::Spaceship(int xIn, int yIn, int wIn, int hIn) :
 		x((double) xIn), y((double) yIn), w(wIn), h(hIn), dx(0), dy(0), angle(0), alive(true) { }
 
 Spaceship::~Spaceship() {
