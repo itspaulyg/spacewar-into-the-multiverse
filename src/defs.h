@@ -21,9 +21,9 @@ actual constant global variables.
 #define NEEDLE_Y        500     // Needle spawnpoint y
 #define NEEDLE_W        100     // Image dimension
 #define NEEDLE_H        40      // Image dimension
-#define BULLET_SPEED    16
+#define BULLET_SPEED    10
 
-#define THRUSTFORCE  0.1
+#define THRUSTFORCE  0.01
 #define TURNSPEED   1
 
 #define TICK 0.2

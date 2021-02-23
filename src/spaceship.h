@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern void blit(SDL_Texture *texture, int x, int y, int w, int h, double angle);
+extern void blit(SDL_Texture *texture, int x, int y);
 extern SDL_Texture *loadTexture(char *filename);
 
 class Spaceship {
@@ -17,7 +18,6 @@ class Spaceship {
 
 		void turn(double dangle);
 		void thrust(double force);
-		void fire();
 
 		void move();
 		bool isAlive();

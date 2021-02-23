@@ -40,8 +40,6 @@ void Spaceship::move() {
 	return;
 }
 
-
-
 bool Spaceship::isAlive() {
 	return alive;
 }

@@ -3,7 +3,9 @@
 static void logic();
 static void draw();
 static void doShips();
-static void fireBullet(Spaceship s);
+static void fireBullet(double x, double y, int h);
+static void drawBullets();
+static void doBullets();
 // static void doWedge();
 // static void doNeedle();
 // static void doWedgeFire();
@@ -22,6 +24,9 @@ void initSpace() {
     app.delegate.logic = logic;
     app.delegate.draw = draw;
 
+    memset(&stage, 0, sizeof(Stage));
+	  stage.bulletTail = &stage.bulletHead;
+
     wedge.loadSprite("./wedge.png");
     needle.loadSprite("./needle.png");
     bulletTexture = loadTexture(const_cast<char*>("bullet.png"));
@@ -29,6 +34,7 @@ void initSpace() {
 
 static void logic() {
     doShips();
+    doBullets();
 }
 
 static void doShips() {
@@ -46,7 +52,7 @@ static void doShips() {
             printf("Thrusting...\n");
         }
         if (app.keyboard[SDL_SCANCODE_W]) {     // fire
-            fireBullet(wedge);
+            fireBullet(wedge.x, wedge.y, wedge.h);
             printf("Firing\n");
         }
         if (app.keyboard[SDL_SCANCODE_Q]) {     // hyperspace
@@ -77,22 +83,57 @@ static void doShips() {
     }
 }
 
-static void fireBullet(Spaceship s){
+static void fireBullet(double x, double y, int h){
 	Entity *bullet;
 	bullet = (Entity*)malloc(sizeof(Entity));
 	memset(bullet, 0, sizeof(Entity));
 
-	bullet->x = s.x;
-	bullet->y = s.y;
+  stage.bulletTail->next = bullet;
+	stage.bulletTail = bullet;
+
+	bullet->x = x;
+	bullet->y = y;
 	bullet->dx = BULLET_SPEED;
 	bullet->status = 1;
 	bullet->texture = bulletTexture;
 	SDL_QueryTexture(bullet->texture, NULL, NULL, &bullet->w, &bullet->h);
 
-	bullet->y += (s.h / 2) - (s.h / 2);
+	bullet->y += (h / 2) - (bullet->h / 2);
+}
+
+static void drawBullets(){
+	Entity *b;
+
+	for (b = stage.bulletHead.next ; b != NULL ; b = b->next){
+		blit(b->texture, (int)b->x, (int)b->y);
+	}
+}
+
+static void doBullets(){
+	Entity *b, *prev;
+
+	prev = &stage.bulletHead;
+
+	for (b = stage.bulletHead.next ; b != NULL ; b = b->next){
+		b->x += b->dx;
+		b->y += b->dy;
+
+		if (b->x > SCREEN_WIDTH){
+			if (b == stage.bulletTail){
+				stage.bulletTail = prev;
+			}
+
+			prev->next = b->next;
+			free(b);
+			b = prev;
+		}
+
+		prev = b;
+	}
 }
 
 static void draw() {
     wedge.draw();
     needle.draw();
+    drawBullets();
 }
