@@ -18,9 +18,8 @@ struct Entity {
   double dx, dy;          // velocity vectors
   double angle;           // angle in degrees
   int reload;             // prevents bullet spam
-	int health;
+  int side;
   bool alive;
-	int status;  // whether bullet is displayed (1) or not (0)
 	SDL_Texture *texture;
 	Entity *next;
 };

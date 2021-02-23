@@ -31,3 +31,6 @@ actual constant global variables.
 
 #define THRUSTFORCE  0.001
 #define TURNSPEED   1
+
+#define SIDE_WEDGE   0    // set different teams for collision detection
+#define SIDE_NEEDLE  1
