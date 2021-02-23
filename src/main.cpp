@@ -18,8 +18,6 @@ int main() {
 
 		app.delegate.draw();
 
-
-
 		presentScene();
 	}
 

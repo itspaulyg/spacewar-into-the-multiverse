@@ -1,3 +1,5 @@
+typedef struct Entity Entity;
+
 typedef struct {
     void (*logic)(void);
     void (*draw)(void);
@@ -11,13 +13,12 @@ typedef struct {
 } App;
 
 struct Entity {
-	double x;
-	double y;
-	int w;
-	int h;
-	double dx;
-	double dy;
+  double x, y;            // position (coordinates)
+  int w, h;               // width and height of displayed texture
+  double dx, dy;          // velocity vectors
+  double angle;           // angle in degrees
 	int health;
+  bool alive;
 	int status;  // whether bullet is displayed (1) or not (0)
 	SDL_Texture *texture;
 	Entity *next;
