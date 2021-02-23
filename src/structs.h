@@ -15,8 +15,8 @@ struct Entity {
 	double y;
 	int w;
 	int h;
-	float dx;
-	float dy;
+	double dx;
+	double dy;
 	int health;
 	int status;  // whether bullet is displayed (1) or not (0)
 	SDL_Texture *texture;

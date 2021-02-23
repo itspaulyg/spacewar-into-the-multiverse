@@ -3,7 +3,7 @@
 static void logic();
 static void draw();
 static void doShips();
-static void fireBullet(double x, double y, int h);
+static void fireBullet(double x, double y, int h, double angle);
 static void drawBullets();
 static void doBullets();
 // static void doWedge();
@@ -52,7 +52,7 @@ static void doShips() {
             printf("Thrusting...\n");
         }
         if (app.keyboard[SDL_SCANCODE_W]) {     // fire
-            fireBullet(wedge.x, wedge.y, wedge.h);
+            fireBullet(wedge.x, wedge.y, wedge.h, wedge.angle);
             printf("Firing\n");
         }
         if (app.keyboard[SDL_SCANCODE_Q]) {     // hyperspace
@@ -83,7 +83,7 @@ static void doShips() {
     }
 }
 
-static void fireBullet(double x, double y, int h){
+static void fireBullet(double x, double y, int h, double angle){
 	Entity *bullet;
 	bullet = (Entity*)malloc(sizeof(Entity));
 	memset(bullet, 0, sizeof(Entity));
@@ -93,12 +93,14 @@ static void fireBullet(double x, double y, int h){
 
 	bullet->x = x;
 	bullet->y = y;
-	bullet->dx = BULLET_SPEED;
+  bullet->dx += (cos(angle * (PI / 180.0)) * BULLET_SPEED);
+  bullet->dy += (sin(angle * (PI / 180.0)) * BULLET_SPEED);
 	bullet->status = 1;
 	bullet->texture = bulletTexture;
 	SDL_QueryTexture(bullet->texture, NULL, NULL, &bullet->w, &bullet->h);
 
 	bullet->y += (h / 2) - (bullet->h / 2);
+
 }
 
 static void drawBullets(){
@@ -118,7 +120,7 @@ static void doBullets(){
 		b->x += b->dx;
 		b->y += b->dy;
 
-		if (b->x > SCREEN_WIDTH){
+		if (0 > b->x || b->x > SCREEN_WIDTH || 0 > b->y || b->y > SCREEN_HEIGHT){
 			if (b == stage.bulletTail){
 				stage.bulletTail = prev;
 			}
