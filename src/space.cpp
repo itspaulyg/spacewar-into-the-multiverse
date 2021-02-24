@@ -16,6 +16,13 @@ static void drawBullets();
 static void doBullets();
 static void doResetCheck();
 static int bulletContact(Entity*);
+
+// Boundary Logic
+static void setTempWedge();
+static void setTempNeedle();
+static void checkBoundsWedge();
+static void checkBoundsNeedle();
+
 // static void doWedgeFire();
 // static void doNeedleFire();
 // static void drawBullets();
@@ -29,9 +36,14 @@ static void drawShips();
 
 static Entity *wedge;
 static Entity *needle;
+static Entity *wedge_temp;
+static Entity *needle_temp;
 static SDL_Texture *wedge_texture;
 static SDL_Texture *needle_texture;
 static SDL_Texture *bullet_texture;
+
+bool wedge_bound = false;
+bool needle_bound = false;
 
 void initSpace() {
     app.delegate.logic = logic;
@@ -65,6 +77,19 @@ static void initWedge() {
     wedge->alive = 1;
     wedge->texture = wedge_texture;
     wedge->side = SIDE_WEDGE;
+
+    wedge_temp = (Entity *)malloc(sizeof(Entity));
+    memset(wedge_temp, 0, sizeof(Entity));
+
+    wedge_temp->x = 0;
+    wedge_temp->y = 0;
+    wedge_temp->w = WEDGE_W;
+    wedge_temp->h = WEDGE_H;
+    wedge_temp->dx = 0;
+    wedge_temp->dy = 0;
+    wedge_temp->alive = 1;
+    wedge_temp->texture = wedge_texture;
+	wedge_temp->side = SIDE_WEDGE;
 }
 
 static void initNeedle() {
@@ -80,6 +105,19 @@ static void initNeedle() {
     needle->alive = 1;
     needle->texture = needle_texture;
     needle->side = SIDE_NEEDLE;
+
+    needle_temp = (Entity *) malloc(sizeof(Entity));
+    memset(needle_temp, 0, sizeof(Entity));
+
+    needle_temp->x = 0;
+    needle_temp->y = 0;
+    needle_temp->w = NEEDLE_W;
+    needle_temp->h = NEEDLE_H;
+    needle_temp->dx = 0;
+    needle_temp->dy = 0;
+    needle_temp->alive = 1;
+    needle_temp->texture = needle_texture;
+    needle_temp->side = SIDE_NEEDLE;
 }
 
 static void logic() {
@@ -129,6 +167,10 @@ static void doNeedle(){
       if (app.keyboard[SDL_SCANCODE_K]) {     // thrust
           needle->dx += (cos(needle->angle * (PI / 180.0)) * THRUSTFORCE);
           needle->dy += (sin(needle->angle * (PI / 180.0)) * THRUSTFORCE);
+          if(needle_bound) {
+          	needle_temp->dx += (cos(needle->angle * (PI / 180.0)) * THRUSTFORCE);
+          	needle_temp->dy += (sin(needle->angle * (PI / 180.0)) * THRUSTFORCE);
+		  }
           printf("Thrusting...\n");
           printf("dx: %f\t dy: %f\n", needle->dx, needle->dy);
       }
@@ -142,6 +184,12 @@ static void doNeedle(){
   }
   needle->x += needle->dx;
   needle->y += needle->dy;
+  if(!needle_bound) setTempNeedle();
+  else {
+	needle_temp->x += needle_temp->dx;
+	needle_temp->y += needle_temp->dy;
+	checkBoundsNeedle();
+  }
 }
 
 
@@ -179,6 +227,10 @@ static void doWedge() {
         if (app.keyboard[SDL_SCANCODE_S]) {     // thrust
             wedge->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
             wedge->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+			if(wedge_bound) {
+            	wedge_temp->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+            	wedge_temp->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+			}
             printf("Thrusting...\n");
             printf("dx: %f\t dy: %f\n", wedge->dx, wedge->dy);
         }
@@ -192,6 +244,120 @@ static void doWedge() {
     }
     wedge->x += wedge->dx;
     wedge->y += wedge->dy;
+	if(!wedge_bound) setTempWedge();
+	else {
+		wedge_temp->x += wedge_temp->dx;
+		wedge_temp->y += wedge_temp->dy;
+		checkBoundsWedge();
+	}
+}
+
+static void setTempWedge() {
+	if(wedge->x + wedge->w >= SCREEN_WIDTH) {
+		wedge_bound = true;
+		wedge_temp->x = 0 - wedge->w;
+		wedge_temp->y = wedge->y;
+		wedge_temp->dx = wedge->dx;
+		wedge_temp->dy = wedge->dy;
+	}
+	if(wedge->x <= 0) {
+		wedge_bound = true;
+		wedge_temp->x = SCREEN_WIDTH;
+		wedge_temp->y = wedge->y;
+		wedge_temp->dx = wedge->dx;
+		wedge_temp->dy = wedge->dy;
+	}
+	if(wedge->y + wedge->h >= SCREEN_HEIGHT) {
+		wedge_bound = true;
+		wedge_temp->x = wedge->x;
+		wedge_temp->y = 0 - wedge->h;
+		wedge_temp->dx = wedge->dx;
+		wedge_temp->dy = wedge->dy;
+	}
+	if(wedge->y <= 0) {
+		wedge_bound = true;
+		wedge_temp->x = wedge->x;
+		wedge_temp->y = SCREEN_HEIGHT;
+		wedge_temp->dx = wedge->dx;
+		wedge_temp->dy = wedge->dy;
+	}
+}
+
+static void setTempNeedle() {
+	if(needle->x + needle->w >= SCREEN_WIDTH) {
+		needle_bound = true;
+		needle_temp->x = 0 - needle->w;
+		needle_temp->y = needle->y;
+		needle_temp->dx = needle->dx;
+		needle_temp->dy = needle->dy;
+	}
+	if(needle->x <= 0) {
+		needle_bound = true;
+		needle_temp->x = SCREEN_WIDTH;
+		needle_temp->y = needle->y;
+		needle_temp->dx = needle->dx;
+		needle_temp->dy = needle->dy;
+	}
+	if(needle->y + needle->h >= SCREEN_HEIGHT) {
+		needle_bound = true;
+		needle_temp->x = needle->x;
+		needle_temp->y = 0 - needle->h;
+		needle_temp->dx = needle->dx;
+		needle_temp->dy = needle->dy;
+	}
+	if(needle->y <= 0) {
+		needle_bound = true;
+		needle_temp->x = needle->x;
+		needle_temp->y = SCREEN_HEIGHT;
+		needle_temp->dx = needle->dx;
+		needle_temp->dy = needle->dy;
+	}
+}
+
+static void checkBoundsWedge() {
+	if(wedge->x >= SCREEN_WIDTH) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_bound = false;
+	}
+	if(wedge->x <= 0 - wedge->w) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_bound = false;
+	}
+	if(wedge->y >= SCREEN_HEIGHT) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_bound = false;
+	}
+	if(wedge->y <= 0 - wedge->h) {
+		wedge->x = wedge_temp->x;
+		wedge->y = wedge_temp->y;
+		wedge_bound = false;
+	}
+}
+
+static void checkBoundsNeedle() {
+	if(needle->x >= SCREEN_WIDTH) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
+	if(needle->x <= 0 - needle->w) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
+	if(needle->y >= SCREEN_HEIGHT) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
+	if(needle->y <= 0 - needle->h) {
+		needle->x = needle_temp->x;
+		needle->y = needle_temp->y;
+		needle_bound = false;
+	}
 }
 
 static void fireBullet(Entity* e){
@@ -275,8 +441,14 @@ static void draw() {
 static void drawShips() {
     if (wedge && wedge->texture) {
         blit(wedge->texture, (int) round(wedge->x), (int) round(wedge->y), wedge->w, wedge->h, wedge->angle);
+		if(wedge_bound) {
+        	blit(wedge->texture, (int) round(wedge_temp->x), (int) round(wedge_temp->y), wedge->w, wedge->h, wedge->angle);
+		}
     }
     if (needle && needle->texture) {
         blit(needle->texture, (int) round(needle->x), (int) round(needle->y), needle->w, needle->h, needle->angle);
+		if(needle_bound) {
+        blit(needle->texture, (int) round(needle_temp->x), (int) round(needle_temp->y), needle->w, needle->h, needle->angle);
+		}
     }
 }
