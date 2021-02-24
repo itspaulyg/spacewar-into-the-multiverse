@@ -17,9 +17,13 @@ struct Entity {
     int w, h;               // width and height of displayed texture
     double dx, dy;          // velocity vectors
     double angle;           // angle in degrees
-
+    int reload;             // prevents bullet spam
+    int side;
     bool alive;
-
-    SDL_Texture *texture;
-    Entity *next;
+	SDL_Texture *texture;
+	Entity *next;
 };
+
+typedef struct {
+	Entity bulletHead, *bulletTail;
+} Stage;
