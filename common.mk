@@ -9,10 +9,7 @@ DEPS += defs.h structs.h
 _OBJS += draw.o
 _OBJS += input.o
 _OBJS += main.o
-<<<<<<< HEAD
-=======
 _OBJS += util.o
->>>>>>> 6cbea1f703dc8a7b227922723a0ea436844c5ce4
 _OBJS += space.o window.o
 
 OBJS = $(patsubst %,$(OUT)/%,$(_OBJS))
