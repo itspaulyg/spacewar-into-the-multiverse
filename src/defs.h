@@ -15,22 +15,25 @@ actual constant global variables.
 #define WEDGE_Y                 100     // Wedge spawnpoint y
 #define WEDGE_W                 38      // Image dimension
 #define WEDGE_H                 50      // Image dimension
-#define WEDGE_TRAIL_WX          1
-#define WEDGE_TRAIL_HX          0.6
-#define WEDGE_TRAIL_OFFSET_X    -34
-#define WEDGE_TRAIL_OFFSET_Y    10
+#define WEDGE_ANGLE             0
 
-#define NEEDLE_X            500     // Needle spawnpoint x
-#define NEEDLE_Y            500     // Needle spawnpoint y
+#define NEEDLE_X            620     // Needle spawnpoint x
+#define NEEDLE_Y            620     // Needle spawnpoint y
 #define NEEDLE_W            60      // Image dimension
 #define NEEDLE_H            25      // Image dimension
-#define NEEDLE_TRAIL_WX     1
-#define NEEDLE_TRAIL_HX     0.5
+#define NEEDLE_ANGLE        180
 
-#define BULLET_SPEED    0.15
+#define SUN_X   350
+#define SUN_Y   350
+#define SUN_W   10
+#define SUN_H   10
 
-#define THRUSTFORCE  0.001
-#define TURNSPEED   1
+#define BULLET_SPEED    2
+#define RELOAD_SPEED    50     // Lower is faster shooting; Higher is slower shooting
 
-#define SIDE_WEDGE   0    // set different teams for collision detection
-#define SIDE_NEEDLE  1
+#define THRUSTFORCE     0.001
+#define TURNSPEED       1
+
+#define SIDE_WEDGE      0    // set different teams for collision detection
+#define SIDE_NEEDLE     1
+#define SIDE_SUN        2

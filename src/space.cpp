@@ -7,15 +7,18 @@ static void draw();
 static void resetSpace();
 static void initWedge();
 static void initNeedle();
+static void initSun();
 
 // Logic
 static void doWedge();
 static void doNeedle();
-static void fireBullet(Entity*);
+static void fireBullet(Entity *);
 static void drawBullets();
 static void doBullets();
 static void doResetCheck();
-static int bulletContact(Entity*);
+static int bulletContact(Entity *);
+static int shipContact();
+static int sunContact();
 
 // Boundary Logic
 static void setTempWedge();
@@ -32,15 +35,18 @@ static void checkBoundsNeedle();
 // static void doGravity();
 
 //  Draw
+static void drawSun();
 static void drawShips();
 
 static Entity *wedge;
 static Entity *needle;
 static Entity *wedge_temp;
 static Entity *needle_temp;
+static Entity *sun;
 static SDL_Texture *wedge_texture;
 static SDL_Texture *needle_texture;
 static SDL_Texture *bullet_texture;
+static SDL_Texture *sun_texture;
 
 bool wedge_bound = false;
 bool needle_bound = false;
@@ -54,7 +60,8 @@ void initSpace() {
 
     wedge_texture = loadTexture((char *) "./wedge.png");
     needle_texture = loadTexture((char *) "./needle.png");
-    bullet_texture = loadTexture(const_cast<char*>("bullet.png"));
+    bullet_texture = loadTexture((char *) "./bullet.png");
+    sun_texture = loadTexture((char *) "./sun.png");
 
     resetSpace();
 }
@@ -62,6 +69,9 @@ void initSpace() {
 static void resetSpace() {
     initWedge();
     initNeedle();
+    initSun();
+    wedge_bound = false;
+    needle_bound = false;
 }
 
 static void initWedge() {
@@ -74,6 +84,7 @@ static void initWedge() {
     wedge->h = WEDGE_H;
     wedge->dx = 0;
     wedge->dy = 0;
+    wedge->angle = WEDGE_ANGLE;
     wedge->alive = 1;
     wedge->texture = wedge_texture;
     wedge->side = SIDE_WEDGE;
@@ -102,6 +113,7 @@ static void initNeedle() {
     needle->h = NEEDLE_H;
     needle->dx = 0;
     needle->dy = 0;
+    needle->angle = NEEDLE_ANGLE;
     needle->alive = 1;
     needle->texture = needle_texture;
     needle->side = SIDE_NEEDLE;
@@ -120,11 +132,28 @@ static void initNeedle() {
     needle_temp->side = SIDE_NEEDLE;
 }
 
+static void initSun() {
+    sun = (Entity *) malloc(sizeof(Entity));
+    memset(sun, 0, sizeof(Entity));
+
+    sun->x = SUN_X;
+    sun->y = SUN_Y;
+    sun->w = SUN_W;
+    sun->h = SUN_H;
+    sun->dx = 0;
+    sun->dy = 0;
+    sun->alive = 1;
+    sun->texture = sun_texture;
+    sun->side = SIDE_SUN;
+}
+
 static void logic() {
     doResetCheck();
     if(needle) doNeedle();
     if(wedge) doWedge();
     doBullets();
+    shipContact();
+    sunContact();
 }
 
 static void doResetCheck(){
@@ -181,15 +210,15 @@ static void doNeedle(){
       if (app.keyboard[SDL_SCANCODE_U]) {     // hyperspace
           printf("Hyperspace\n");
       }
-  }
-  needle->x += needle->dx;
-  needle->y += needle->dy;
-  if(!needle_bound) setTempNeedle();
-  else {
-	needle_temp->x += needle_temp->dx;
-	needle_temp->y += needle_temp->dy;
-	checkBoundsNeedle();
-  }
+    }
+        needle->x += needle->dx;
+        needle->y += needle->dy;
+    if (!needle_bound) setTempNeedle();
+    else {
+        needle_temp->x += needle_temp->dx;
+        needle_temp->y += needle_temp->dy;
+        checkBoundsNeedle();
+    }
 }
 
 
@@ -366,20 +395,20 @@ static void fireBullet(Entity* e){
 	bullet = (Entity*)malloc(sizeof(Entity));
 	memset(bullet, 0, sizeof(Entity));
 
-  stage.bulletTail->next = bullet;
+    stage.bulletTail->next = bullet;
 	stage.bulletTail = bullet;
 
 	bullet->x = e->x;
 	bullet->y = e->y;
-  bullet->dx += (cos(e->angle * (PI / 180.0)) * BULLET_SPEED);
-  bullet->dy += (sin(e->angle * (PI / 180.0)) * BULLET_SPEED);
+    bullet->dx += (cos(e->angle * (PI / 180.0)) * BULLET_SPEED);
+    bullet->dy += (sin(e->angle * (PI / 180.0)) * BULLET_SPEED);
 	bullet->alive = 1;
-  bullet->side = e->side; // belongs to team of whoever shot it
+    bullet->side = e->side; // belongs to team of whoever shot it
 	bullet->texture = bullet_texture;
 	SDL_QueryTexture(bullet->texture, NULL, NULL, &bullet->w, &bullet->h);
 	bullet->y += (e->h / 2) - (bullet->h / 2);
 
-  e->reload = 500;  // timer value in frames for how often a bullet can be shot
+    e->reload = RELOAD_SPEED;  // timer value in frames for how often a bullet can be shot
 }
 
 static void drawBullets(){
@@ -433,9 +462,41 @@ static int bulletContact(Entity *b){
 	return 0;
 }
 
+static int shipContact() {
+    if(!wedge || !needle) return 1;
+
+    if (collision((int) needle->x, (int) needle->y, needle->w, needle->h, (int) wedge->x, (int) wedge->y, wedge->w, wedge->h)) {
+        wedge->alive = 0;
+        needle->alive = 0;
+        return 1;
+    }
+    return 0;
+}
+
+static int sunContact() {
+    if(!wedge || !needle) return 1;
+
+    if (collision((int) sun->x, (int) sun->y, sun->w, sun->h, (int) wedge->x, (int) wedge->y, wedge->w, wedge->h)) {
+        wedge->alive = 0;
+        return 1;
+    }
+    if (collision((int) needle->x, (int) needle->y, needle->w, needle->h, (int) sun->x, (int) sun->y, sun->w, sun->h)) {
+        needle->alive = 0;
+        return 1;
+    }
+    return 0;
+}
+
 static void draw() {
+    drawSun();
     drawShips();
     drawBullets();
+}
+
+static void drawSun() {
+    if (sun->texture) {
+        blit(sun->texture, (int) round(sun->x), (int) round(sun->y), sun->w, sun->h, sun->angle);
+    }
 }
 
 static void drawShips() {
@@ -448,7 +509,7 @@ static void drawShips() {
     if (needle && needle->texture) {
         blit(needle->texture, (int) round(needle->x), (int) round(needle->y), needle->w, needle->h, needle->angle);
 		if(needle_bound) {
-        blit(needle->texture, (int) round(needle_temp->x), (int) round(needle_temp->y), needle->w, needle->h, needle->angle);
+            blit(needle->texture, (int) round(needle_temp->x), (int) round(needle_temp->y), needle->w, needle->h, needle->angle);
 		}
     }
 }
