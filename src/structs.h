@@ -20,6 +20,7 @@ struct Entity {
     int reload;             // prevents bullet spam
     int side;
     bool alive;
+	bool thrust;
 	SDL_Texture *texture;
 	Entity *next;
 };

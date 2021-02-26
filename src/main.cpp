@@ -9,6 +9,10 @@ int main() {
 
 	initSpace();
 
+	while(!startGame()) {
+		mainScreen();
+	}
+
 	while(1) {
 		prepareScene();
 

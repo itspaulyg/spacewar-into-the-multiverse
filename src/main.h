@@ -11,5 +11,8 @@ extern void initSpace();
 extern void prepareScene();
 extern void presentScene();
 
+extern bool startGame();
+extern void mainScreen();
+
 App app;
 Stage stage;

@@ -37,17 +37,27 @@ static void checkBoundsNeedle();
 //  Draw
 static void drawSun();
 static void drawShips();
+static void drawGameOver();
 
 static Entity *wedge;
 static Entity *needle;
 static Entity *wedge_temp;
 static Entity *needle_temp;
+static Entity *wedge_thrust;
+//static Entity *needle_thrust;
 static Entity *sun;
 static SDL_Texture *wedge_texture;
 static SDL_Texture *needle_texture;
+static SDL_Texture *thrust_texture;
 static SDL_Texture *bullet_texture;
 static SDL_Texture *sun_texture;
+static SDL_Texture *wedge_win_texture;
+static SDL_Texture *needle_win_texture;
+static SDL_Texture *no_winner_texture;
 
+int checkGameOver();
+
+int game_over = 0;
 bool wedge_bound = false;
 bool needle_bound = false;
 
@@ -60,8 +70,13 @@ void initSpace() {
 
     wedge_texture = loadTexture((char *) "./wedge.png");
     needle_texture = loadTexture((char *) "./needle.png");
+	thrust_texture = loadTexture((char *) "./thrust_flame.png");
     bullet_texture = loadTexture((char *) "./bullet.png");
     sun_texture = loadTexture((char *) "./sun.png");
+
+	wedge_win_texture = loadTexture((char *) "./wedge_wins.png");
+	needle_win_texture = loadTexture((char *) "./needle_wins.png");
+	no_winner_texture = loadTexture((char *) "./no_winner.png");
 
     resetSpace();
 }
@@ -72,9 +87,11 @@ static void resetSpace() {
     initSun();
     wedge_bound = false;
     needle_bound = false;
+	game_over = 0;
 }
 
 static void initWedge() {
+	// wedge
     wedge = (Entity *) malloc(sizeof(Entity));
     memset(wedge, 0, sizeof(Entity));
 
@@ -86,9 +103,11 @@ static void initWedge() {
     wedge->dy = 0;
     wedge->angle = WEDGE_ANGLE;
     wedge->alive = 1;
+	wedge->thrust = 0;
     wedge->texture = wedge_texture;
     wedge->side = SIDE_WEDGE;
 
+	// wedge_temp
     wedge_temp = (Entity *) malloc(sizeof(Entity));
     memset(wedge_temp, 0, sizeof(Entity));
 
@@ -101,6 +120,16 @@ static void initWedge() {
     wedge_temp->alive = 1;
     wedge_temp->texture = wedge_texture;
 	wedge_temp->side = SIDE_WEDGE;
+
+	// wedge_thrust
+	wedge_thrust = (Entity *) malloc(sizeof(Entity));
+	memset(wedge_thrust, 0, sizeof(Entity));
+
+	wedge_thrust->x = (int) round(wedge->x) + 3*(wedge->w/4);
+	wedge_thrust->y = (int) round(wedge->y) + (int) (wedge->h/3);// + (int) (wedge->h / 12);
+	wedge_thrust->w = 15;
+	wedge_thrust->h = 15;
+	wedge_thrust->texture = thrust_texture;
 }
 
 static void initNeedle() {
@@ -115,6 +144,7 @@ static void initNeedle() {
     needle->dy = 0;
     needle->angle = NEEDLE_ANGLE;
     needle->alive = 1;
+	needle->thrust = 0;
     needle->texture = needle_texture;
     needle->side = SIDE_NEEDLE;
 
@@ -194,6 +224,7 @@ static void doNeedle(){
           needle->angle += 360;
       }
       if (app.keyboard[SDL_SCANCODE_K]) {     // thrust
+		  needle->thrust = 1;
           needle->dx += (cos(needle->angle * (PI / 180.0)) * THRUSTFORCE);
           needle->dy += (sin(needle->angle * (PI / 180.0)) * THRUSTFORCE);
           if(needle_bound) {
@@ -203,6 +234,9 @@ static void doNeedle(){
           printf("Thrusting...\n");
           printf("dx: %f\t dy: %f\n", needle->dx, needle->dy);
       }
+	  else {
+		  needle->thrust = 0;
+	  }
       if (app.keyboard[SDL_SCANCODE_I] && needle->reload == 0) {     // fire
           fireBullet(needle);
           printf("Firing\n");
@@ -239,6 +273,8 @@ static void doWedge() {
 
         if (app.keyboard[SDL_SCANCODE_A]) {     // turn CCW
             wedge->angle -= TURNSPEED;
+//			wedge_thrust->x += (wedge_thrust->x - wedge->x + wedge->w / 2) * cos(wedge->angle) - (wedge_thrust->y - wedge->y + wedge->h / 2) * sin(wedge->angle);
+//			wedge_thrust->y += (wedge_thrust->x - wedge->x + wedge->w / 2) * sin(wedge->angle) + (wedge_thrust->y - wedge->y + wedge->h / 2) * cos(wedge->angle);
             printf("A\n");
             printf("%f\n", wedge->angle);
         }
@@ -254,8 +290,11 @@ static void doWedge() {
             wedge->angle += 360;
         }
         if (app.keyboard[SDL_SCANCODE_S]) {     // thrust
+			wedge->thrust = 1;
             wedge->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
             wedge->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+            wedge_thrust->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
+            wedge_thrust->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
 			if(wedge_bound) {
             	wedge_temp->dx += (cos(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
             	wedge_temp->dy += (sin(wedge->angle * (PI / 180.0)) * THRUSTFORCE);
@@ -263,6 +302,9 @@ static void doWedge() {
             printf("Thrusting...\n");
             printf("dx: %f\t dy: %f\n", wedge->dx, wedge->dy);
         }
+		else {
+			wedge->thrust = 0;
+		}
         if (app.keyboard[SDL_SCANCODE_W] && wedge->reload == 0) {     // fire
             fireBullet(wedge);
             printf("Firing\n");
@@ -273,6 +315,8 @@ static void doWedge() {
     }
     wedge->x += wedge->dx;
     wedge->y += wedge->dy;
+    wedge_thrust->x += wedge->dx;
+    wedge_thrust->y += wedge->dy;
 	if(!wedge_bound) setTempWedge();
 	else {
 		wedge_temp->x += wedge_temp->dx;
@@ -491,6 +535,39 @@ static void draw() {
     drawSun();
     drawShips();
     drawBullets();
+	if(game_over) {
+		drawGameOver();
+	}
+	else {
+		game_over = checkGameOver();
+	}
+}
+
+int checkGameOver() {
+	if(wedge && needle) {
+		if(!wedge->alive && !needle->alive) {
+			return 1;
+		}
+		if(!wedge->alive) {
+			return 2;
+		}
+		if(!needle->alive) {
+			return 3;
+		}
+	}
+	return 0;
+}
+
+static void drawGameOver() {
+	if(game_over == 1) {
+		SDL_RenderCopy(app.renderer, no_winner_texture, NULL, NULL);
+	}
+	else if(game_over == 3) {
+		SDL_RenderCopy(app.renderer, wedge_win_texture, NULL, NULL);
+	}
+	else if(game_over == 2) {
+		SDL_RenderCopy(app.renderer, needle_win_texture, NULL, NULL);
+	}
 }
 
 static void drawSun() {
@@ -504,6 +581,9 @@ static void drawShips() {
         blit(wedge->texture, (int) round(wedge->x), (int) round(wedge->y), wedge->w, wedge->h, wedge->angle);
 		if(wedge_bound) {
         	blit(wedge->texture, (int) round(wedge_temp->x), (int) round(wedge_temp->y), wedge->w, wedge->h, wedge->angle);
+		}
+		if(wedge->thrust) {
+			blit(wedge_thrust->texture, (int) round(wedge_thrust->x), (int) round(wedge_thrust->y), wedge_thrust->w, wedge_thrust->h, wedge->angle);
 		}
     }
     if (needle && needle->texture) {

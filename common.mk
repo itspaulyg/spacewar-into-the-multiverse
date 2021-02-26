@@ -11,6 +11,7 @@ _OBJS += input.o
 _OBJS += main.o
 _OBJS += util.o
 _OBJS += space.o window.o
+_OBJS += screen.o
 
 OBJS = $(patsubst %,$(OUT)/%,$(_OBJS))
 
